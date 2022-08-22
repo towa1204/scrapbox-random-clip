@@ -1,0 +1,34 @@
+{
+  "name": "scrapbox-random-clip",
+  "version": "1.0.0",
+  "description": "Scrapboxのプロジェクトからランダムにページをスクリーンショット",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/towa1204/scrapbox-random-clip.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/towa1204/scrapbox-random-clip/issues"
+  },
+  "homepage": "https://github.com/towa1204/scrapbox-random-clip#readme",
+  "dependencies": {
+    "puppeteer": "^16.2.0",
+    "ts-node": "^10.9.1"
+  },
+  "devDependencies": {
+    "@types/node": "^18.7.9",
+    "@types/puppeteer": "^5.4.6",
+    "@typescript-eslint/eslint-plugin": "^5.33.1",
+    "eslint": "^8.22.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.7.1",
+    "typescript": "^4.7.4"
+  }
+}
