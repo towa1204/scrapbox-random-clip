@@ -1,0 +1,2 @@
+# scrapbox-random-clip
+Scrapboxのプロジェクトからランダムにページをスクリーンショット
