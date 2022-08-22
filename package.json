@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/towa1204/scrapbox-random-clip#readme",
   "dependencies": {
+    "commander": "^9.4.0",
     "puppeteer": "^16.2.0",
     "ts-node": "^10.9.1"
   },
