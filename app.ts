@@ -1,6 +1,6 @@
 /* eslint-disable no-plusplus */
 import puppeteer from 'puppeteer';
-import fetch from 'node-fetch';
+import fetch, { RequestInfo, RequestInit } from 'node-fetch';
 import { Command } from 'commander';
 
 const program = new Command();
@@ -29,14 +29,24 @@ const cookie = {
   domain: 'scrapbox.io',
 };
 
+// fetchのラッパー関数
+async function fetchScrapboxApi(url: RequestInfo, init?: RequestInit) {
+  const response = await fetch(url, init);
+  const data = await response.json();
+  if (!response.ok) {
+    console.error(`projectname: ${options.project}\n${data.name}: ${data.message}`);
+    process.exit(1);
+  }
+  return data;
+}
+
 const getRandomPage = async (projectname: string) => {
-  // TODO: fetch のエラー処理
-  const pageSize: number = (
-    await (await fetch(`https://scrapbox.io/api/pages/${projectname}?limit=1`, fetchOpts)).json()
-  ).count; // プロジェクトの総ページ数
+  const pageSize: number = (await fetchScrapboxApi(`https://scrapbox.io/api/pages/${projectname}?limit=1`, fetchOpts))
+    .count; // プロジェクトの総ページ数
   const randNum = Math.floor(Math.random() * pageSize); // 0 <= randNum < pageSize
+
   const randPageTitle: string = (
-    await (await fetch(`https://scrapbox.io/api/pages/${projectname}?limit=1&skip=${randNum}`, fetchOpts)).json()
+    await fetchScrapboxApi(`https://scrapbox.io/api/pages/${projectname}?limit=1&skip=${randNum}`, fetchOpts)
   ).pages[0].title;
 
   return { title: randPageTitle, url: `https://scrapbox.io/${projectname}/${encodeURIComponent(randPageTitle)}` };
