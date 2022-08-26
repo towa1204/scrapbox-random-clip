@@ -32,14 +32,14 @@ const cookie = {
 
 function errorexit(message: string) {
   console.error(message);
-  process.exit(1);
+  return process.exit(1);
 }
 
 // fetchのラッパー関数
 async function fetchScrapboxApi(url: RequestInfo, init?: RequestInit) {
   const response = await fetch(url, init);
   const data = await response.json();
-  if (!response.ok) errorexit(`projectname: ${options.project}\n${data.name}: ${data.message}`);
+  if (!response.ok) return errorexit(`projectname: ${options.project}\n${data.name}: ${data.message}`);
   return data;
 }
 
@@ -98,13 +98,10 @@ const randomScreenshot = async ({ title, url }: { title: string; url: string }) 
 
   const screenshotRangeElem = await page.$('div#screenshotRange');
   const filename = `${new Date().toLocaleString('sv').replace(/\D/g, '')}.png`; // YYYYMMDDHHmmss.png
-  if (screenshotRangeElem !== null) {
-    await screenshotRangeElem.screenshot({ path: filename });
-  } else {
-    errorexit('failed to get div#screenshotRange.');
-  }
+  if (screenshotRangeElem === null) return errorexit('failed to get div#screenshotRange');
+  await screenshotRangeElem.screenshot({ path: filename });
   await browser.close();
-  console.log(`${title}\n${url}\n${filename}\n`);
+  console.log(`${title}\n${url}\n${filename}`);
 };
 
 const main = async () => {
