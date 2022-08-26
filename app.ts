@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 /* eslint-disable no-plusplus */
 import puppeteer from 'puppeteer';
 import fetch, { RequestInfo, RequestInit } from 'node-fetch';
@@ -29,14 +30,16 @@ const cookie = {
   domain: 'scrapbox.io',
 };
 
+function errorexit(message: string) {
+  console.error(message);
+  process.exit(1);
+}
+
 // fetchのラッパー関数
 async function fetchScrapboxApi(url: RequestInfo, init?: RequestInit) {
   const response = await fetch(url, init);
   const data = await response.json();
-  if (!response.ok) {
-    console.error(`projectname: ${options.project}\n${data.name}: ${data.message}`);
-    process.exit(1);
-  }
+  if (!response.ok) errorexit(`projectname: ${options.project}\n${data.name}: ${data.message}`);
   return data;
 }
 
@@ -93,8 +96,14 @@ const randomScreenshot = async (pageUrl: string) => {
     if (navElem !== null) navElem.remove();
   }, linesRange);
 
-  const twRangeSize = await page.$$('div#screenshotRange');
-  await twRangeSize[0].screenshot({ path: 'test.png' });
+  const screenshotRangeElem = await page.$('div#screenshotRange');
+  if (screenshotRangeElem !== null) {
+    // YYYYMMDDHHmmss.png
+    const dateFormat = new Date().toLocaleString('sv').replace(/\D/g, '');
+    await screenshotRangeElem.screenshot({ path: `${dateFormat}.png` });
+  } else {
+    errorexit('failed to get div#screenshotRange.');
+  }
   await browser.close();
 };
 
