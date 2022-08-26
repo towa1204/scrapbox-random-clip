@@ -55,11 +55,11 @@ const getRandomPage = async (projectname: string) => {
   return { title: randPageTitle, url: `https://scrapbox.io/${projectname}/${encodeURIComponent(randPageTitle)}` };
 };
 
-const randomScreenshot = async (pageUrl: string) => {
+const randomScreenshot = async ({ title, url }: { title: string; url: string }) => {
   const browser = await puppeteer.launch({ args: ['--start-maximized'] });
   const page = await browser.newPage();
   if (options.connectsid !== undefined) await page.setCookie(cookie);
-  await page.goto(pageUrl, { waitUntil: 'networkidle0' });
+  await page.goto(url, { waitUntil: 'networkidle0' });
 
   // ページ行数を取得
   const lineSize = (await page.$$('div.lines div.line')).length;
@@ -97,20 +97,19 @@ const randomScreenshot = async (pageUrl: string) => {
   }, linesRange);
 
   const screenshotRangeElem = await page.$('div#screenshotRange');
+  const filename = `${new Date().toLocaleString('sv').replace(/\D/g, '')}.png`; // YYYYMMDDHHmmss.png
   if (screenshotRangeElem !== null) {
-    // YYYYMMDDHHmmss.png
-    const dateFormat = new Date().toLocaleString('sv').replace(/\D/g, '');
-    await screenshotRangeElem.screenshot({ path: `${dateFormat}.png` });
+    await screenshotRangeElem.screenshot({ path: filename });
   } else {
     errorexit('failed to get div#screenshotRange.');
   }
   await browser.close();
+  console.log(`${title}\n${url}\n${filename}\n`);
 };
 
 const main = async () => {
   const page = await getRandomPage(options.project);
-  console.log(page);
-  randomScreenshot(page.url);
+  randomScreenshot(page);
 };
 
 main();
