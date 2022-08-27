@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 /* eslint-disable no-unused-expressions */
 /* eslint-disable no-plusplus */
 import puppeteer from 'puppeteer';
@@ -43,6 +44,41 @@ async function fetchScrapboxApi(url: RequestInfo, init?: RequestInit) {
   return data;
 }
 
+// 与えられた行番号の高さを返す
+const calcLineHeight = async (page: puppeteer.Page, lineNum: number) => {
+  const lineElem = await page.$(`div.lines div.line:nth-of-type(${lineNum})`);
+  if (lineElem === null) return errorexit(`faild to get $(div.lines div.line:nth-of-type(${lineNum}))`);
+  const lineHeight = await (await lineElem.getProperty('clientHeight')).jsonValue();
+  return lineHeight;
+};
+
+// ランダムにMINHEIGHTpx以上のスクリーンショット範囲を取得
+// もし、ページ全体のサイズがMINHEIGHTpx未満のとき、ページ全体の範囲を返す
+const getScreenshotRange = async (page: puppeteer.Page, lineSize: number, MINHEIGHT: number) => {
+  let imageHeight = 0;
+  let lowerBound = lineSize;
+  while (imageHeight < MINHEIGHT && lowerBound !== 0) {
+    imageHeight += await calcLineHeight(page, lowerBound);
+    lowerBound--;
+  }
+
+  let screenshotRange = { startLine: 0, endLine: 0 };
+  if (lowerBound === 0 || imageHeight === MINHEIGHT) {
+    screenshotRange = { startLine: lowerBound + 1, endLine: lineSize };
+  } else {
+    // 1 <= startLine <= lowerBound + 1
+    screenshotRange.startLine = Math.floor(Math.random() * (lowerBound + 1)) + 1;
+    screenshotRange.endLine = screenshotRange.startLine;
+    imageHeight = 0;
+    while (imageHeight < MINHEIGHT) {
+      imageHeight += await calcLineHeight(page, screenshotRange.endLine);
+      screenshotRange.endLine++;
+    }
+    screenshotRange.endLine--; // imageHeightはstartLine~endLined-1の範囲になる
+  }
+  return screenshotRange;
+};
+
 const getRandomPage = async (projectname: string) => {
   const pageSize: number = (await fetchScrapboxApi(`https://scrapbox.io/api/pages/${projectname}?limit=1`, fetchOpts))
     .count; // プロジェクトの総ページ数
@@ -65,10 +101,8 @@ const randomScreenshot = async ({ title, url }: { title: string; url: string }) 
   const lineSize = (await page.$$('div.lines div.line')).length;
   console.log(`ページの行数: ${lineSize}`);
 
-  // TODO: ランダムにスクリーンショットの範囲を決定
-  // document.querySelectorAll('div.lines div.line:nth-of-type(1)')[0].clientHeight
-  // nth-of-type 1 <= x <= lineSize
-  const linesRange = { startLine: 1, endLine: Math.floor(Math.random() * lineSize + 1) };
+  // ランダムにスクリーンショットの範囲を決定
+  const linesRange = await getScreenshotRange(page, lineSize, 560);
   console.log(`スクリーンショットの範囲: startLine: ${linesRange.startLine}, endLine: ${linesRange.endLine}`);
 
   // スクリーンショット範囲のElementを取得(要修正)
