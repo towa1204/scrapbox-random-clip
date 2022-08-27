@@ -5,15 +5,30 @@ import puppeteer from 'puppeteer';
 import fetch, { RequestInfo, RequestInit } from 'node-fetch';
 import { Command } from 'commander';
 
+function errorexit(message: string) {
+  console.error(message);
+  return process.exit(1);
+}
+
 const program = new Command();
 program
   .requiredOption('-p, --project <projectname>', 'scrapbox projectname')
   .option('-c, --connectsid <value>', 'connect.sid value (used for private projects)')
+  .option(
+    '-s --size <imageSize>',
+    'screenshot image size(px)',
+    (value: string) => {
+      const parsedValue = parseInt(value, 10);
+      if (Number.isNaN(parsedValue) || parsedValue < 1) {
+        errorexit('-s options value is invalid');
+      }
+      return parsedValue;
+    },
+    560
+  )
   .parse(process.argv);
 
 const options = program.opts();
-console.log(`projectname: ${options.project}`);
-// console.log(`connect.sid: ${options.connectsid}`);
 
 const fetchOpts =
   options.connectsid !== undefined
@@ -30,11 +45,6 @@ const cookie = {
   url: 'https://scrapbox.io/',
   domain: 'scrapbox.io',
 };
-
-function errorexit(message: string) {
-  console.error(message);
-  return process.exit(1);
-}
 
 // fetchのラッパー関数
 async function fetchScrapboxApi(url: RequestInfo, init?: RequestInit) {
@@ -99,11 +109,11 @@ const randomScreenshot = async ({ title, url }: { title: string; url: string }) 
 
   // ページ行数を取得
   const lineSize = (await page.$$('div.lines div.line')).length;
-  console.log(`ページの行数: ${lineSize}`);
+  // console.log(`ページの行数: ${lineSize}`);
 
   // ランダムにスクリーンショットの範囲を決定
-  const linesRange = await getScreenshotRange(page, lineSize, 560);
-  console.log(`スクリーンショットの範囲: startLine: ${linesRange.startLine}, endLine: ${linesRange.endLine}`);
+  const linesRange = await getScreenshotRange(page, lineSize, options.size);
+  // console.log(`スクリーンショットの範囲: startLine: ${linesRange.startLine}, endLine: ${linesRange.endLine}`);
 
   // スクリーンショット範囲のElementを取得(要修正)
   await page.evaluate(({ startLine, endLine }) => {
