@@ -39,4 +39,4 @@ https://scrapbox.io/judzlf-note/github%E9%81%8B%E7%94%A8
 
 ※${connectsid}はシェル変数
 
-![20220901162335.png](./sample.png)
+![20220901162335.png](./assets/sample.png)
