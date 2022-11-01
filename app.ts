@@ -12,10 +12,11 @@ function errorexit(message: string) {
 
 const program = new Command();
 program
+  .name('npx ts-node app.ts')
   .requiredOption('-p, --project <projectname>', 'scrapbox projectname')
   .option('-c, --connectsid <value>', 'connect.sid value (used for private projects)')
   .option(
-    '-s --size <imageSize>',
+    '-s --size <imagesize>',
     'screenshot image size(px)',
     (value: string) => {
       const parsedValue = parseInt(value, 10);
