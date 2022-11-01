@@ -9,13 +9,13 @@ Scrapbox のプロジェクトからランダムにページをスクリーン�
 ## 使い方
 
 ```
-Usage: app [options]
+Usage: npx ts-node app.ts [options]
 
 Options:
--p, --project <projectname> scrapbox projectname
--c, --connectsid <value> connect.sid value (used for private projects)
--s --size <imageSize> screenshot image size(px) (default: 560)
--h, --help display help for command
+  -p, --project <projectname>  scrapbox projectname
+  -c, --connectsid <value>     connect.sid value (used for private projects)
+  -s --size <imagesize>        screenshot image size(px) (default: 560)
+  -h, --help                   display help for command
 ```
 
 - `-p, --project`オプション
