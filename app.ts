@@ -103,8 +103,9 @@ const getRandomPage = async (projectname: string) => {
     await fetchScrapboxApi(`https://scrapbox.io/api/pages/${projectname}?limit=1&skip=${randNum}`, fetchOpts)
   ).pages[0].title;
 
-  const lineSize: number = (await fetchScrapboxApi(`https://scrapbox.io/api/pages/${projectname}/${pageTitle}`)).lines
-    .length;
+  const lineSize: number = (
+    await fetchScrapboxApi(`https://scrapbox.io/api/pages/${projectname}/${pageTitle}`, fetchOpts)
+  ).lines.length;
 
   return {
     title: pageTitle,
