@@ -90,16 +90,24 @@ const getScreenshotRange = async (page: puppeteer.Page, lineSize: number, MINHEI
   return screenshotRange;
 };
 
+// Scrapboxのプロジェクトの中からランダムにページを選択、そのページのタイトルとページURLを取得
 const getRandomPage = async (projectname: string) => {
   const pageSize: number = (await fetchScrapboxApi(`https://scrapbox.io/api/pages/${projectname}?limit=1`, fetchOpts))
     .count; // プロジェクトの総ページ数
   const randNum = Math.floor(Math.random() * pageSize); // 0 <= randNum < pageSize
 
-  const randPageTitle: string = (
+  const pageTitle: string = (
     await fetchScrapboxApi(`https://scrapbox.io/api/pages/${projectname}?limit=1&skip=${randNum}`, fetchOpts)
   ).pages[0].title;
 
-  return { title: randPageTitle, url: `https://scrapbox.io/${projectname}/${encodeURIComponent(randPageTitle)}` };
+  const lineSize: number = (await fetchScrapboxApi(`https://scrapbox.io/api/pages/${projectname}/${pageTitle}`)).lines
+    .length;
+
+  return {
+    title: pageTitle,
+    url: `https://scrapbox.io/${projectname}/${encodeURIComponent(pageTitle)}`,
+    size: lineSize,
+  };
 };
 
 const randomScreenshot = async ({ title, url }: { title: string; url: string }) => {
