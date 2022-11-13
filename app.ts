@@ -1,6 +1,4 @@
 /* eslint-disable no-await-in-loop */
-/* eslint-disable no-unused-expressions */
-/* eslint-disable no-plusplus */
 import puppeteer from 'puppeteer';
 import fetch, { RequestInfo, RequestInit } from 'node-fetch';
 import { Command } from 'commander';
@@ -65,7 +63,10 @@ const calcLineHeight = async (page: puppeteer.Page, lineNum: number) => {
 
 // ランダムにMINHEIGHTpx以上のスクリーンショット範囲を取得
 // もし、ページ全体のサイズがMINHEIGHTpx未満のとき、ページ全体の範囲を返す
-const getScreenshotRange = async (page: puppeteer.Page, lineSize: number, MINHEIGHT: number) => {
+const getScreenshotRange = async (page: puppeteer.Page, MINHEIGHT: number) => {
+  // ページ行数を取得
+  const lineSize = (await page.$$('div.lines div.line')).length;
+
   let imageHeight = 0;
   let lowerBound = lineSize;
   while (imageHeight < MINHEIGHT && lowerBound !== 0) {
@@ -90,31 +91,41 @@ const getScreenshotRange = async (page: puppeteer.Page, lineSize: number, MINHEI
   return screenshotRange;
 };
 
+// Scrapboxのプロジェクトの中からランダムにページを選択、そのページのタイトルとページURLを取得
 const getRandomPage = async (projectname: string) => {
   const pageSize: number = (await fetchScrapboxApi(`https://scrapbox.io/api/pages/${projectname}?limit=1`, fetchOpts))
     .count; // プロジェクトの総ページ数
   const randNum = Math.floor(Math.random() * pageSize); // 0 <= randNum < pageSize
 
-  const randPageTitle: string = (
+  const pageTitle: string = (
     await fetchScrapboxApi(`https://scrapbox.io/api/pages/${projectname}?limit=1&skip=${randNum}`, fetchOpts)
   ).pages[0].title;
 
-  return { title: randPageTitle, url: `https://scrapbox.io/${projectname}/${encodeURIComponent(randPageTitle)}` };
+  const lineSize: number = (
+    await fetchScrapboxApi(`https://scrapbox.io/api/pages/${projectname}/${pageTitle}`, fetchOpts)
+  ).lines.length;
+
+  return {
+    title: pageTitle,
+    url: `https://scrapbox.io/${projectname}/${encodeURIComponent(pageTitle)}`,
+    size: lineSize,
+  };
 };
 
-const randomScreenshot = async ({ title, url }: { title: string; url: string }) => {
+// 指定したページの指定した範囲をスクリーンショットし指定したファイル名で保存
+// rangeがnullのときはランダムに範囲を取得する
+const pageScreenshot = async (
+  pageurl: string,
+  range: { startLine: number; endLine: number } | null,
+  filename: string
+) => {
+  // pageurlまで遷移
   const browser = await puppeteer.launch({ args: ['--start-maximized'] });
   const page = await browser.newPage();
   if (options.connectsid !== undefined) await page.setCookie(cookie);
-  await page.goto(url, { waitUntil: 'networkidle0' });
+  await page.goto(pageurl, { waitUntil: 'networkidle0' });
 
-  // ページ行数を取得
-  const lineSize = (await page.$$('div.lines div.line')).length;
-  // console.log(`ページの行数: ${lineSize}`);
-
-  // ランダムにスクリーンショットの範囲を決定
-  const linesRange = await getScreenshotRange(page, lineSize, options.size);
-  // console.log(`スクリーンショットの範囲: startLine: ${linesRange.startLine}, endLine: ${linesRange.endLine}`);
+  const linesRange = range || (await getScreenshotRange(page, options.size));
 
   // スクリーンショット範囲のElementを取得(要修正)
   await page.evaluate(({ startLine, endLine }) => {
@@ -142,16 +153,21 @@ const randomScreenshot = async ({ title, url }: { title: string; url: string }) 
   }, linesRange);
 
   const screenshotRangeElem = await page.$('div#screenshotRange');
-  const filename = `${new Date().toLocaleString('sv').replace(/\D/g, '')}.png`; // YYYYMMDDHHmmss.png
   if (screenshotRangeElem === null) return errorexit('failed to get div#screenshotRange');
+
   await screenshotRangeElem.screenshot({ path: filename });
+
   await browser.close();
-  console.log(`${title}\n${url}\n${filename}`);
 };
 
 const main = async () => {
   const page = await getRandomPage(options.project);
-  randomScreenshot(page);
+
+  const filename = `${new Date().toLocaleString('sv').replace(/\D/g, '')}.png`; // YYYYMMDDHHmmss.png
+
+  await pageScreenshot(page.url, null, filename);
+
+  console.log(`${page.title}\n${page.url}\n${filename}`);
 };
 
 main();
