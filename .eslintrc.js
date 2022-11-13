@@ -11,5 +11,8 @@ module.exports = {
     tsconfigRootDir: __dirname,
     project: ['./tsconfig.json'],
   },
-  rules: {},
+  rules: {
+    'no-console': 'off',
+    'no-plusplus': 'off',
+  },
 };

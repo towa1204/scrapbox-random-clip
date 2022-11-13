@@ -1,6 +1,4 @@
 /* eslint-disable no-await-in-loop */
-/* eslint-disable no-unused-expressions */
-/* eslint-disable no-plusplus */
 import puppeteer from 'puppeteer';
 import fetch, { RequestInfo, RequestInit } from 'node-fetch';
 import { Command } from 'commander';
