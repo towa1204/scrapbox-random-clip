@@ -1,6 +1,7 @@
 # Image
 *.png
 !sample.png
+!sample2.png
 # Logs
 logs
 *.log

@@ -33,7 +33,24 @@ Options:
 
 ## 使用例
 
-プライベートプロジェクト judzlf-note からランダムにスクリーンショットするとき
+### public プロジェクト lsadsfj をランダムにスクリーンショット
+
+コマンド
+
+```
+scrapbox-random-clip$ npx ts-node app.ts -p lsadsfj
+RPKI
+https://scrapbox.io/lsadsfj/RPKI
+20241012233926.png
+```
+
+スクリーンショット結果
+
+![20220901162335.png](./assets/sample2.png)
+
+### private プロジェクト judzlf-note をランダムにスクリーンショット
+
+コマンド
 
 ```
 scrapbox-random-clip$ npx ts-node app.ts -p judzlf-note -c "${connectsid}"
@@ -43,5 +60,7 @@ https://scrapbox.io/judzlf-note/github%E9%81%8B%E7%94%A8
 ```
 
 ※`${connectsid}`はシェル変数
+
+スクリーンショット結果
 
 ![20220901162335.png](./assets/sample.png)
