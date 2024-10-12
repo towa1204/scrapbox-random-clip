@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import puppeteer from 'puppeteer';
+import puppeteer, { Page } from 'puppeteer';
 import fetch, { RequestInfo, RequestInit } from 'node-fetch';
 import { Command } from 'commander';
 
@@ -54,7 +54,7 @@ async function fetchScrapboxApi(url: RequestInfo, init?: RequestInit) {
 }
 
 // 与えられた行番号の高さを返す
-const calcLineHeight = async (page: puppeteer.Page, lineNum: number) => {
+const calcLineHeight = async (page: Page, lineNum: number) => {
   const lineElem = await page.$(`div.lines div.line:nth-of-type(${lineNum})`);
   if (lineElem === null) return errorexit(`faild to get $(div.lines div.line:nth-of-type(${lineNum}))`);
   const lineHeight = await (await lineElem.getProperty('clientHeight')).jsonValue();
@@ -63,7 +63,7 @@ const calcLineHeight = async (page: puppeteer.Page, lineNum: number) => {
 
 // ランダムにMINHEIGHTpx以上のスクリーンショット範囲を取得
 // もし、ページ全体のサイズがMINHEIGHTpx未満のとき、ページ全体の範囲を返す
-const getScreenshotRange = async (page: puppeteer.Page, MINHEIGHT: number) => {
+const getScreenshotRange = async (page: Page, MINHEIGHT: number) => {
   // ページ行数を取得
   const lineSize = (await page.$$('div.lines div.line')).length;
 
